@@ -49,7 +49,7 @@ class ProductController:
             try:
                 upload_result = cloudinary.uploader.upload(
                     imagem,
-                    folder=f'product_images/{product_name}',
+                    folder=f'demo-store/product_images/{product_name}',
                     public_id=public_id,
                     overwrite=False,
                     resource_type='image'
