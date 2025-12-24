@@ -198,7 +198,7 @@ class ProfileController:
         try:
             upload_result = cloudinary.uploader.upload(
                 file,
-                folder="user_avatars",
+                folder="demo-store/user_avatars",
                 resource_type="image",
                 overwrite=True
             )

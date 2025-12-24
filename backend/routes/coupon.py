@@ -70,7 +70,7 @@ def create_coupon():
     if image and image.filename:
         upload_result = cloudinary.uploader.upload(
             image, 
-            folder="coupons",
+            folder="demo-store/coupons",
             public_id=None,
             ovewrite=True
         )
@@ -135,7 +135,7 @@ def update_coupon(coupon_id):
         if image_file and image_file.filename:
             upload_result = cloudinary.uploader.upload(
                 image_file, 
-                folder="coupons",
+                folder="demo-store/coupons",
                 public_id=None,
                 ovewrite=True
             )

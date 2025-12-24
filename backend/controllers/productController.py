@@ -80,7 +80,7 @@ class ProductController:
         try:
             upload_result = cloudinary.uploader.upload(
                 video_file,
-                folder=f"product_videos/{product_name}",
+                folder=f"demo-store/product_videos/{product_name}",
                 public_id=public_id,
                 resource_type="video",
                 overwrite=True

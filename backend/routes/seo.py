@@ -41,7 +41,7 @@ def create_seo():
         try:
             upload_result = cloudinary.uploader.upload(
                 og_image_file,
-                folder=f'seo',  # pasta no Cloudinary
+                folder=f'demo-store/seo',  # pasta no Cloudinary
                 public_id=filename.rsplit('.', 1)[0],
                 overwrite=True,
                 resource_type='image'

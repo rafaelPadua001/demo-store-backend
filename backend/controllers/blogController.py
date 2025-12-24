@@ -78,7 +78,7 @@ class BlogController:
 
             if cover_image:
                 # Nome do blog vai ser usado como pasta no Cloudinary
-                blog_folder = f"blogs/{post.slug or post.title.replace(' ', '_')}"
+                blog_folder = f"demo-store/blogs/{post.slug or post.title.replace(' ', '_')}"
                 
                 upload_result = cloudinary_upload(
                     cover_image,
