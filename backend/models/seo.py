@@ -3,7 +3,7 @@ from database import db
 class Seo(db.Model):
     __tablename__ = 'seo'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     route = db.Column(db.String(255), nullable=False, unique=True)
     metatitle = db.Column(db.String(255), nullable=True)
     metadescription = db.Column(db.Text, nullable=True)
