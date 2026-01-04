@@ -50,7 +50,7 @@ class CreditCardPayment(PaymentStrategy):
         # Se for None ou não for lista, transforma em lista vazia
         if not isinstance(products, list):
             products = []
-            
+
         if not card_token:
             card_token = self.create_card_token(data)
        
@@ -177,8 +177,7 @@ class CreditCardPayment(PaymentStrategy):
                 }
             }
 
-            print("🔄 Criando token do cartão:", token_payload)
-
+            
             response = requests.post(token_url, headers=headers, json=token_payload)
             result = response.json()
 
