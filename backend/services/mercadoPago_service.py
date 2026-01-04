@@ -37,7 +37,8 @@ class CreditCardPayment(PaymentStrategy):
         payer_cpf = data.get("payer_cpf") or data.get('cpf')
         payer_name = data.get("payer_name") or data.get('name')
         products = data.get("products")
-        
+        card_token = data.get("card_token")
+       
         address = data.get("address") or {}
 
         if isinstance(products, str):
@@ -49,14 +50,10 @@ class CreditCardPayment(PaymentStrategy):
         # Se for None ou não for lista, transforma em lista vazia
         if not isinstance(products, list):
             products = []
-
-        card_token = self.create_card_token(data)
+            
         if not card_token:
-            return {
-                "status": 400,
-                "message": "Falha ao criar token do cartão"
-            }
-
+            card_token = self.create_card_token(data)
+       
         url = "https://api.mercadopago.com/v1/payments"
         headers = {
             "X-Idempotency-Key": str(uuid.uuid4()),
@@ -159,8 +156,7 @@ class CreditCardPayment(PaymentStrategy):
         try:
             # ⚡ Extrai dados do cartão do payload
             card_data = data.get("card_data", {})
-          
-            
+         
             token_url = "https://api.mercadopago.com/v1/card_tokens"
             headers = {
                 "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}",
@@ -168,7 +164,7 @@ class CreditCardPayment(PaymentStrategy):
             }
 
             token_payload = {
-                "card_number": card_data.get("card_number", "").replace(" ", ""),
+                "card_number": card_data.get("card_number", "").replace(" ", "") ,
                 "expiration_month": int(card_data.get("expiration_month", 0)),
                 "expiration_year": int(card_data.get("expiration_year", 0)),
                 "security_code": card_data.get("security_code", ""),
@@ -176,19 +172,19 @@ class CreditCardPayment(PaymentStrategy):
                     "name": data.get("name", ""),
                     "identification": {
                         "type": "CPF",
-                        "number": data["cpf"].replace(".", "").replace("-", "").strip()
+                        "number": data["payer_cpf"].replace(".", "").replace("-", "").strip()
                     }
                 }
             }
 
-            #print("🔄 Criando token do cartão:", token_payload)
+            print("🔄 Criando token do cartão:", token_payload)
 
             response = requests.post(token_url, headers=headers, json=token_payload)
             result = response.json()
 
             if response.status_code == 201:
                 #print("✅ Token criado com sucesso:", result.get("id"))
-                return result.get("id")
+                return result
             else:
                 print("❌ Erro ao criar token:", result)
                 return None

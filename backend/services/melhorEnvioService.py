@@ -32,24 +32,30 @@ class MelhorEnvioService:
         product_id, product_weight, product_height, product_width, product_length, quantity
         """
         url = f"{self.baseUrl}/me/shipment/calculate"
+        normalized_products = [
+            self.normalize_product(p, index)
+            for index, p in enumerate(products)
+        ]
 
         # Calcular peso e dimensões do pacote
-        total_weight = sum([float(p.get("product_weight", 0)) * int(p.get("quantity", 1)) for p in products])
-        total_height = sum([float(p.get("product_height", 0)) * int(p.get("quantity", 1)) for p in products])
-        max_width = max([float(p.get("product_width", 0)) for p in products], default=10)
-        max_length = max([float(p.get("product_length", 0)) for p in products], default=15)
+        total_weight = sum(p["weight"] * p["quantity"] for p in normalized_products)
+        total_height = sum(p["height"] * p["quantity"] for p in normalized_products)
+        max_width = max(p["width"] for p in normalized_products)
+        max_length = max(p["length"] for p in normalized_products)
 
-        melhorenvio_products = []
-        for p in products:
-            melhorenvio_products.append({
-                "id": str(p.get("product_id")),
-                "quantity": int(p.get("quantity", 1)),
-                "weight": float(p.get("product_weight", 0)),
-                "width": float(p.get("product_width", 0)),
-                "height": float(p.get("product_height", 0)),
-                "length": float(p.get("product_length", 0)),
-                "insurance_value": 1.00
-            })
+
+        melhorenvio_products = [
+            {
+                "id": p["internal_id"],
+                "quantity": p["quantity"],
+                "weight": p["weight"],
+                "width": p["width"],
+                "height": p["height"],
+                "length": p["length"],
+                "insurance_value": p["insurance_value"]
+            }
+            for p in normalized_products
+        ]
 
         payload = {
             "from": {"postal_code": zipcode_origin},
@@ -57,22 +63,25 @@ class MelhorEnvioService:
             "products": melhorenvio_products,
             "packages": [
                 {
-                    "weight": f"{total_weight:.2f}",
+                    "weight": round(total_weight, 2),
                     "width": max_width,
                     "height": total_height,
                     "length": max_length,
-                    "insurance_value": "1.00",
+                    "insurance_value": sum(p["insurance_value"] for p in normalized_products),
                     "format": "box",
-                    "products": [{"id": str(p["product_id"]), "quantity": int(p["quantity"])} for p in products]
+                    "products": [
+                        {"id": p["internal_id"], "quantity": p["quantity"]}
+                        for p in normalized_products
+                    ]
                 }
             ],
-            "services": "",
             "options": {
                 "receipt": False,
                 "own_hand": False,
                 "collect": False
-            },
+            }
         }
+
 
         try:
             response = requests.post(url, headers=self.headers, json=payload)
@@ -88,8 +97,68 @@ class MelhorEnvioService:
                     print("→ Resposta texto:", e.response.text)
             raise
 
+    def normalize_product(self, p, index):
+        # 1️⃣ Garantia de tipo
+        if not isinstance(p, dict):
+            raise TypeError(
+                f"Produto inválido no índice {index}. "
+                f"Esperado dict, recebido {type(p)} -> {p}"
+            )
 
+        return {
+            "internal_id": str(
+                p.get("id")
+                or p.get("product_id")
+                or index + 1
+            ),
 
+            "quantity": int(p.get("quantity", 1)),
+
+            # Melhor Envio exige peso mínimo > 0
+            "weight": max(
+                float(
+                    p.get("weight")
+                    or p.get("product_weight")
+                    or 0
+                ),
+                0.01
+            ),
+
+            # Dimensões mínimas exigidas
+            "width": max(
+                float(
+                    p.get("width")
+                    or p.get("product_width")
+                    or 0
+                ),
+                1
+            ),
+
+            "height": max(
+                float(
+                    p.get("height")
+                    or p.get("product_height")
+                    or 0
+                ),
+                1
+            ),
+
+            "length": max(
+                float(
+                    p.get("length")
+                    or p.get("product_length")
+                    or 0
+                ),
+                1
+            ),
+
+            "insurance_value": float(
+                p.get("secure_value")
+                or p.get("insurance_value")
+                or 0
+            )
+        }
+    
     def create_shipment(self, data, delivery_id=None):
         print(f"Dados recebidos para criar etiqueta: {data}")
 
