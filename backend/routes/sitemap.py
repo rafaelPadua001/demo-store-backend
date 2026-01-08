@@ -8,7 +8,7 @@ from models.productSeo import ProductSeo
 sitemap_bp = Blueprint('sitemap', __name__)
 @sitemap_bp.route('/sitemap.xml')
 def sitemap():
-    base_url = "https://rua11store-catalog-api-lbp7.onrender.com"
+    base_url = "https://demo-store-zk1t.onrender.com"
 
     urls = []
 
@@ -49,7 +49,7 @@ def sitemap():
 
 @sitemap_bp.route('/robots.txt')
 def robots_txt():
-    base_url = "https://rua11store-catalog-api-lbp7.onrender.com"
+    base_url = "https://demo-store-zk1t.onrender.com"
 
     content = (
         "User-agent: *\n"

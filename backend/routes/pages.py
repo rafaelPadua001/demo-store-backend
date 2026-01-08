@@ -71,3 +71,8 @@ def update_page(page_id):
 def delete_page(page_id):
     PageController.delete_page(page_id)
     return jsonify({'message': 'Page deleted'}), 200
+
+@pages_bp.route("/pages/<int:page_id>/hero-buttons/<int:index>", methods=["DELETE"])
+def delete_hero_button(page_id, index):
+   PageController.delete_hero_button(page_id, index)
+   return jsonify({'message': 'Button removed'}), 200

@@ -1,5 +1,6 @@
 from models.page import Page
 from database import db
+import json
 
 class PageController:
 
@@ -15,6 +16,7 @@ class PageController:
             "heroSubtitle": page.hero_subtitle,
             "heroImage": page.hero_image,
             "carouselImages": page.carousel_images,
+            "heroBackgroundColor": page.hero_background_color,
             "heroButtons": page.hero_buttons
 
         } for page in pages]
@@ -75,6 +77,22 @@ class PageController:
 
         db.session.commit()
         return page
+    
+    @staticmethod
+    def delete_hero_button(page_id, index):
+        page = Page.query.get_or_404(page_id)
+
+        hero_buttons = json.loads( page.hero_buttons or "[]")
+
+        if index < 0 or index >= len(hero_buttons):
+            return {"error": "índice inválido"}, 400
+        
+        hero_buttons.pop(index)
+        page.hero_buttons = hero_buttons
+
+        db.session.commit()
+
+        return {"heroButtons": hero_buttons}, 200
 
 
     @staticmethod
