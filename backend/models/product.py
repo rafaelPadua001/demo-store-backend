@@ -41,7 +41,7 @@ class Product(db.Model):
     variations = db.relationship(
         "Variation",
         back_populates="product",
-        lazy="joined",
+        lazy="select",
         cascade="all, delete-orphan"
     )
 

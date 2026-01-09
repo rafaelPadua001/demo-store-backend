@@ -2,6 +2,8 @@ from datetime import datetime
 from database import db
 from sqlalchemy.orm import joinedload
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 
 class Stock(db.Model):
@@ -9,12 +11,11 @@ class Stock(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     id_product = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), nullable=False)
     category_id = db.Column(db.Integer, nullable=False)
     product_name = db.Column(db.String(255), nullable=False)
     product_price = db.Column(db.Float, nullable=False)
     product_quantity = db.Column(db.Float, nullable=False)
-    variations = db.Column(JSONB)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -31,7 +32,7 @@ class Stock(db.Model):
         self.variations = variations
         
     def to_dict(self):
-        return {
+       return {
             "id": self.id,
             "id_product": self.id_product,
             "user_id": self.user_id,
@@ -44,7 +45,11 @@ class Stock(db.Model):
             # "product_height": self.product_height,
             # "product_weight": self.product_weight,
             # "product_lenght": self.product_lenght,
-            "variations": self.variations,
+            "variations": (
+                [v.to_dict() for v in self.product.variations]
+                if self.product and self.product.variations
+                else []
+            ),
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "product": self.product.to_dict() if self.product else None

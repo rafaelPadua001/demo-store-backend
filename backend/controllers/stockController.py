@@ -2,6 +2,8 @@ from flask import jsonify, request
 from models.stock import Stock
 from controllers.productController import ProductController
 from database import db  # sua instância do SQLAlchemy
+from sqlalchemy.orm import joinedload
+from models.product import Product
 
 class StockController:
     @staticmethod
@@ -21,9 +23,17 @@ class StockController:
 
     @staticmethod
     def get_stock():
-        stocks = Stock.query.all()
-        stocks_list = [stock.to_dict() for stock in stocks]  # to_dict deve estar no model
-        return jsonify(stocks_list), 200
+        stocks = (
+            Stock.query
+            .options(
+                joinedload(Stock.product)
+                .joinedload(Product.variations)
+            )
+            .all()
+        )
+
+        stock_list = [stock.to_dict() for stock in stocks]
+        return jsonify(stock_list), 200
 
     @staticmethod
     def get_stock_by_id(stock_id):
